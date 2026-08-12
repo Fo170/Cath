@@ -1,0 +1,39 @@
+{
+    "name": "Cath",
+    "version": "1.0.0",
+    "description": "Aide multitâche coopératif pour Arduino (fork MIT de Phildem/Cath v1.3)",
+    "keywords": [
+        "arduino",
+        "multitask",
+        "cooperative",
+        "scheduler",
+        "tasks"
+    ],
+    "authors": [
+        {
+            "name": "Olivier FOURNET",
+            "email": "olivier.fournet@free.fr",
+            "url": "https://github.com/Fo170"
+        }
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/Fo170/Cath",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Fo170/Cath.git"
+    },
+    "frameworks": "arduino",
+    "platforms": [
+        "espressif8266",
+        "espressif32",
+        "atmelavr"
+    ],
+    "headers": "Cath.h",
+    "export": {
+        "include": [
+            "Cath.h",
+            "README.md",
+            "LICENSE"
+        ]
+    }
+}
