@@ -8,9 +8,32 @@ Fork **MIT** de la librairie `Phildem/Cath` **v1.3** (2021) : helper **multitâc
 
 ## Principe
 
-Chaque tâche est une classe dérivant de `Cath`, qui implémente `SetUp()` et `Loop()`.
-La tâche s'enregistre dans son constructeur via `Cath::S_Register()` avec sa période en millisecondes.
-`Cath::S_SetUp()` (appelé dans `setup()`) puis `Cath::S_Loop()` (appelé à chaque `loop()`) pilotent l'ensemble.
+### Multitâche coopératif
+
+Cath n'utilise **ni RTOS, ni interruptions, ni préemption** : c'est un **ordonnanceur coopératif**. Le flot d'exécution reste un unique `loop()` Arduino — chaque tâche « rend la main » en retournant de son `Loop()`, c'est elle qui décide de laisser tourner les autres.
+
+- Chaque tâche est une classe dérivant de `Cath`, qui implémente `SetUp()` et `Loop()`.
+- Elle s'enregistre dans son constructeur via `Cath::S_Register()` avec sa période en millisecondes.
+- `Cath::S_SetUp()` (dans `setup()`) puis `Cath::S_Loop()` (à chaque `loop()`) pilotent l'ensemble.
+- Le minuteur est basé sur `millis()` : un tick est détecté à chaque changement de milliseconde.
+
+### Conséquences
+
+- **Une seule chose à la fois** : pendant qu'une tâche exécute son `Loop()`, rien d'autre ne tourne.
+- **Timing indicatif, pas temps réel** : la période est la fréquence *minimale* d'appel du `Loop()`, pas un délai garanti.
+- **Pas de sections critiques nécessaires** entre tâches : une variable partagée n'est jamais interrompue au milieu d'un accès par une autre tâche.
+
+## Limites à prendre en compte
+
+| Limite | Conséquence |
+|---|---|
+| `Loop()` **non bloquant** obligatoire | Un `delay()` long, une attente réseau/Serial ou un calcul long dans une tâche **bloque toutes les autres** et le compteur de ticks. |
+| `S_Loop()` appelé trop rarement | Un écart ≥ ~256 ms entre deux appels de `S_Loop()` fait **perdre des ticks** (détection par l'octet faible de `millis()`) : les périodes dérivent. Appeler `S_Loop()` à chaque `loop()`. |
+| Charge totale | La somme des durées de tous les `Loop()` doit rester très inférieure à la période la plus courte, sinon les tâches s'espacent et dérivent. |
+| Période minimale | 1 ms (résolution de `millis()` ; `S_Register` borne silencieusement à ≥ 1). |
+| Période maximale | 65535 ms avec `__CathOpt_SmallCounter__` (compteur `uint16_t`) ; pratiquement illimitée sinon (`uint32_t`). |
+| Nombre de tâches | Borné par `kMaxCathTask`, à définir **avant** `#include "Cath.h"` (aucune valeur par défaut). |
+| Wrap de `millis()` (~49,7 j) | Sans effet : seule la détection de changement de l'octet faible est utilisée, pas de soustraction de temps absolu. |
 
 ---
 
