@@ -1,6 +1,6 @@
 {
     "name": "Cath",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Aide multitâche coopératif pour Arduino (fork MIT de Phildem/Cath v1.3)",
     "keywords": [
         "arduino",
